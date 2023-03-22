@@ -17,11 +17,10 @@ describe('Calendar', () => {
     const currentDay = screen.getByRole('button', {
       name: format(new Date(), 'MMMM d, yyyy'),
     });
-    await user.click(currentDay)
+    await user.click(currentDay);
 
-    const times = screen.getAllByRole('button', { name: /:00/ })
+    const hours = screen.getAllByRole('button', { name: /:00/ });
 
-    expect(times).toHaveLength(8);
-
+    expect(hours).toHaveLength(3);
   });
 });

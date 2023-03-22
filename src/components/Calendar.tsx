@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import ReactCalendar from 'react-calendar';
 import { add, format } from 'date-fns';
+import {
+  INTERVAL,
+  STORE_CLOSING_TIME,
+  STORE_OPENING_TIME,
+} from '~/constants/config';
 
 interface CalendarProps {}
 
@@ -15,12 +20,12 @@ const Calendar: React.FC<CalendarProps> = () => {
     dateTime: null,
   });
 
-  const getTimes = (date: DateObject, interval: number = 30): Date[] => {
+  const getTimes = (date: DateObject, interval: number = INTERVAL): Date[] => {
     if (!date || !date.justDate) return [];
 
     const { justDate } = date;
-    const beginning = add(justDate, { hours: 9 });
-    const end = add(justDate, { hours: 17 });
+    const beginning = add(justDate, { hours: STORE_OPENING_TIME });
+    const end = add(justDate, { hours: STORE_CLOSING_TIME });
 
     const times = [];
     for (let i = beginning; i < end; i = add(i, { minutes: interval })) {
@@ -36,16 +41,19 @@ const Calendar: React.FC<CalendarProps> = () => {
     <div className='h-screen flex flex-col justify-center items-center'>
       {date.justDate ? (
         <div className='flex gap-4'>
-          {times.length > 0 && times.map((time, i) => (
-            <div key={`time-${i}`} className='rounded-sm bg-gray-100 p-2'>
-              <button
-                type='button'
-                onClick={() => setDate((prev) => ({ ...prev, dateTime: time }))}
-              >
-                {format(time, 'kk:mm')}
-              </button>
-            </div>
-          ))}
+          {times.length > 0 &&
+            times.map((time, i) => (
+              <div key={`time-${i}`} className='rounded-sm bg-gray-100 p-2'>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setDate((prev) => ({ ...prev, dateTime: time }))
+                  }
+                >
+                  {format(time, 'kk:mm')}
+                </button>
+              </div>
+            ))}
         </div>
       ) : (
         <ReactCalendar
