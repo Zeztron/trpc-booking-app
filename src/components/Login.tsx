@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,16 +7,13 @@ import { api } from '~/utils/api';
 
 const Login = () => {
   const router = useRouter();
-  const login = () => {
-    router.push('/dashboard');
-  }
 
-  // const { mutate: login, error } = api.admin.login.useMutation({
-  //   onSuccess: () => {
-  //     router.push('/dashbord')
-  //   }
-  // })
-  //
+  const { mutate, error } = api.admin.login.useMutation({
+    onSuccess: () => {
+      router.push('/dashbord');
+    },
+  });
+
   const [input, setInput] = useState({
     email: '',
     password: '',
@@ -45,7 +42,7 @@ const Login = () => {
               href='#'
               className='font-medium text-indigo-600 hover:text-indigo-500'
             >
-              start yout 14-day free trial
+              start your 14-day free trial
             </a>
           </p>
         </div>
@@ -53,7 +50,7 @@ const Login = () => {
           <input type='hidden' name='remember' defaultValue='true' />
           <div className='-space-y-px rounded-md shadow-sm'>
             <p className='pb-1 text-sm text-red-600'>
-              todo: invalid login creds
+              {error && 'Invalid login credentials.'}
             </p>
             <div>
               <label htmlFor='email-address' className='sr-only'>
@@ -115,7 +112,10 @@ const Login = () => {
           <div>
             <button
               type='submit'
-              onClick={login}
+              onClick={(e) => {
+                e.preventDefault();
+                mutate(input)
+              }}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
               <span className='absolute inset-y-0 left-0 flex items-center pl-3'>
