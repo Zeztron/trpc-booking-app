@@ -1,4 +1,4 @@
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { Login } from '~/components';
 import { api } from '~/utils/api';
@@ -10,9 +10,9 @@ jest.mock('../utils/api', () => {
     api: {
       admin: {
         login: {
-          useMutation: jest.fn(() => {
-            return { mutate: jest.fn() };
-          }),
+          useMutation: jest.fn(() => ({
+            mutate: jest.fn(),
+          })),
         },
       },
     },
@@ -43,13 +43,14 @@ describe('Login', () => {
   });
 
   it('should redirect to the dashboard page after successful login', async () => {
+    const mutate = jest.fn();
     const mockPush = jest.fn();
     const useRouterMock = jest.fn(() => ({ push: mockPush })) as jest.Mock;
-    const mutate = jest.fn()
 
     //@ts-ignore
-    api.admin.login.useMutation.mockImplementation(() => {
-      mutate;
+    api.admin.login.useMutation.mockImplementation(({ onSuccess }) => {
+      onSuccess();
+      return { mutate };
     });
 
     //@ts-ignore
@@ -60,12 +61,17 @@ describe('Login', () => {
     const passwordInput = getByLabelText('Password') as HTMLInputElement;
     const signInButton = getByText('Sign in') as HTMLButtonElement;
 
-    fireEvent.change(emailInput, { target: { value: 'hi@email.com' } });
+    fireEvent.change(emailInput, { target: { value: 'admin@email.com' } });
     fireEvent.change(passwordInput, { target: { value: 'admin' } });
     fireEvent.click(signInButton);
 
-    // await waitFor(() => expect(mutate).toBeCalledTimes(1));
-
-    // await waitFor(() => expect(useMutationMock).toBeCalledTimes(1))
+    await waitFor(() => expect(mutate).toBeCalledTimes(1));
+    await waitFor(() =>
+      expect(mutate).toBeCalledWith({
+        email: 'admin@email.com',
+        password: 'admin',
+      })
+    );
+    await waitFor(() => expect(mockPush).toBeCalledWith('/dashboard'));
   });
 });

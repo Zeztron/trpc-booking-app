@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import userEvent from '@testing-library/user-event';
 import Calendar from '../components/Calendar';
 
-describe.skip('Calendar', () => {
+describe('Calendar', () => {
   it('should render a calendar when no date is selected', () => {
     render(<Calendar />);
     const monthAndYear = format(new Date(), 'MMMM yyyy');

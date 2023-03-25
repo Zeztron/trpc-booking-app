@@ -8,7 +8,13 @@ import { api } from '~/utils/api';
 const Login = () => {
   const router = useRouter();
 
-  const { mutate, error } = api.admin.login.useMutation();
+
+  // const { mutate, error } = api.admin.login.useMutation()
+  const { mutate, error } = api.admin.login.useMutation({
+    onSuccess: () => {
+      router.push('/dashboard');
+    },
+  });
 
   const [input, setInput] = useState({
     email: '',
@@ -110,7 +116,7 @@ const Login = () => {
               type='submit'
               onClick={(e) => {
                 e.preventDefault();
-                mutate(input);
+                mutate(input)
               }}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
