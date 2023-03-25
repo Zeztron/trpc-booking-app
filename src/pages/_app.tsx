@@ -8,4 +8,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   return <Component {...pageProps} />;
 };
 
+export const App = api.withTRPC(MyApp);
+
 export default api.withTRPC(MyApp);

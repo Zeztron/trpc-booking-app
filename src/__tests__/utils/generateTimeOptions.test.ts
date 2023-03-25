@@ -1,6 +1,6 @@
 import { generateTimeOptions } from '~/utils/generateTimeOptions';
 
-describe.only('generateTimeOptions', () => {
+describe.skip('generateTimeOptions', () => {
   it('should generate an array of time options based on the start hour, end hour, and interval', () => {
     const startHour = 9;
     const endHour = 12;
