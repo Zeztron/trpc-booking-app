@@ -12,6 +12,7 @@ jest.mock('../utils/api', () => {
         login: {
           useMutation: jest.fn(() => ({
             mutate: jest.fn(),
+            error: 'Invalid login credentials',
           })),
         },
       },
@@ -40,6 +41,25 @@ describe('Login', () => {
     fireEvent.change(passwordInput, { target: { value: 'test' } });
 
     expect(passwordInput.value).toBe('test');
+  });
+
+  it('should show error message when login fails', async () => {
+    const { getByLabelText, getByText } = loginWithWrapper();
+
+    const emailInput = getByLabelText('Email address') as HTMLInputElement;
+    const passwordInput = getByLabelText('Password') as HTMLInputElement;
+    const signInButton = getByText('Sign in') as HTMLButtonElement;
+
+    fireEvent.change(emailInput, {
+      target: { value: 'wrongemail@example.com' },
+    });
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
+
+    fireEvent.click(signInButton);
+
+    await waitFor(() =>
+      expect(getByText('Invalid login credentials.')).toBeInTheDocument()
+    );
   });
 
   it('should redirect to the dashboard page after successful login', async () => {
@@ -72,6 +92,7 @@ describe('Login', () => {
         password: 'admin',
       })
     );
+
     await waitFor(() => expect(mockPush).toBeCalledWith('/dashboard'));
   });
 });
