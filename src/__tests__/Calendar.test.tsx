@@ -1,23 +1,29 @@
 import { render, screen } from '@testing-library/react';
 import { format } from 'date-fns';
-import userEvent from '@testing-library/user-event';
 import Calendar from '../components/Calendar';
 
 describe('Calendar', () => {
   it('should render a calendar when no date is selected', () => {
-    render(<Calendar />);
+    const mockSetDate = jest.fn();
+    const mockDate = {
+      justDate: null,
+      dateTime: null,
+    };
+    render(<Calendar setDate={mockSetDate} date={mockDate} />);
     const monthAndYear = format(new Date(), 'MMMM yyyy');
     const calendarElement = screen.getByRole('button', { name: monthAndYear });
     expect(calendarElement).toBeInTheDocument();
   });
 
   it('should render times after selecting a date', async () => {
-    const user = userEvent.setup();
-    render(<Calendar />);
-    const currentDay = screen.getByRole('button', {
-      name: format(new Date(), 'MMMM d, yyyy'),
-    });
-    await user.click(currentDay);
+    const mockSetDate = jest.fn();
+    const mockDate: DateObject = {
+      justDate: new Date(),
+      dateTime: null,
+    };
+    mockDate.justDate?.setHours(0, 0, 0, 0);
+
+    render(<Calendar setDate={mockSetDate} date={mockDate} />);
 
     const hours = screen.getAllByRole('button', { name: /:00/ });
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import ReactCalendar from 'react-calendar';
 import { add, format } from 'date-fns';
 import {
@@ -7,23 +7,17 @@ import {
   STORE_OPENING_TIME,
 } from '~/constants/config';
 
-interface CalendarProps {}
-
-interface DateObject {
-  justDate: Date | null;
-  dateTime: Date | null;
+interface CalendarProps {
+  date: DateObject;
+  setDate: Dispatch<SetStateAction<DateObject>>;
 }
 
-const Calendar: React.FC<CalendarProps> = () => {
-  const [date, setDate] = useState<DateObject>({
-    justDate: null,
-    dateTime: null,
-  });
-
+const Calendar: React.FC<CalendarProps> = ({ date, setDate }) => {
   const getTimes = (date: DateObject, interval: number = INTERVAL): Date[] => {
     if (!date || !date.justDate) return [];
 
     const { justDate } = date;
+
     const beginning = add(justDate, { hours: STORE_OPENING_TIME });
     const end = add(justDate, { hours: STORE_CLOSING_TIME });
 
