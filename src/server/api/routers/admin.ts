@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SignJWT } from 'jose';
 import { nanoid } from 'nanoid';
 import { TRPCError } from '@trpc/server';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, publicProcedure, adminProcedure } from '../trpc';
 import { getJwtSecretKey } from '~/lib/auth';
 import cookie from 'cookie';
 
