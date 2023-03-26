@@ -5,6 +5,7 @@ import { api } from '~/utils/api';
 import withNextTRPCProvider from '~/utils/withNextTrpc';
 
 jest.mock('next/navigation');
+
 jest.mock('../utils/api', () => {
   return {
     api: {
@@ -12,7 +13,7 @@ jest.mock('../utils/api', () => {
         login: {
           useMutation: jest.fn(() => ({
             mutate: jest.fn(),
-            error: 'Invalid login credentials',
+            isError: true,
           })),
         },
       },

@@ -8,12 +8,11 @@ import { api } from '~/utils/api';
 const Login = () => {
   const router = useRouter();
 
-  const { mutate, error } = api.admin.login.useMutation({
+  const { mutate, isError } = api.admin.login.useMutation({
     onSuccess: () => {
       router.push('/dashboard');
     },
   });
-
 
   const [input, setInput] = useState({
     email: '',
@@ -51,7 +50,7 @@ const Login = () => {
           <input type='hidden' name='remember' defaultValue='true' />
           <div className='-space-y-px rounded-md shadow-sm'>
             <p className='pb-1 text-sm text-red-600'>
-              {error && 'Invalid login credentials.'}
+              {isError && 'Invalid login credentials.'}
             </p>
             <div>
               <label htmlFor='email-address' className='sr-only'>
