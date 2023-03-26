@@ -20,7 +20,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        {!date.dateTime && <Calendar setDate={setDate} date={date} />}
+        <Calendar setDate={setDate} date={date} />
       </main>
     </>
   );
