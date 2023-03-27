@@ -4,6 +4,7 @@ import { type NextPage } from 'next';
 import { useState } from 'react';
 import Head from 'next/head';
 import { Calendar } from '~/components';
+import { DateObject } from '~/utils/types';
 
 const Home: NextPage = () => {
   const [date, setDate] = useState<DateObject>({

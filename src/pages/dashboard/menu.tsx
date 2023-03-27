@@ -3,12 +3,15 @@ import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import { MultiValue } from 'react-select/dist/declarations/src';
 import { MAX_FILE_SIZE } from '~/constants/config';
+import { api } from '~/utils/api';
 import { selectOptions } from '~/utils/helpers';
+import { Categories } from '~/utils/types';
 
 const DynamicSelect = dynamic(() => import('react-select'), { ssr: false });
 
 interface Input {
   name: string;
+  description: string;
   price: number;
   categories: MultiValue<{ value: string; label: string }>;
   file: undefined | File;
@@ -16,6 +19,7 @@ interface Input {
 
 const initialInput = {
   name: '',
+  description: '',
   price: 0,
   categories: [],
   file: undefined,
@@ -25,6 +29,13 @@ const menu = () => {
   const [input, setInput] = useState<Input>(initialInput);
   const [preview, setPreview] = useState<string>('');
   const [error, setError] = useState<string>('');
+
+  const { mutateAsync: createPresignedUrl } =
+    api.admin.createPresignedUrl.useMutation();
+  const { mutateAsync: addItem } = api.admin.addMenuItem.useMutation();
+  const { data: menuItems, refetch } = api.menu.getMenuItems.useQuery();
+  const { mutateAsync: deleteMenuItem } =
+    api.admin.deleteMenuItem.useMutation();
 
   useEffect(() => {
     if (!input.file) return;
@@ -46,6 +57,55 @@ const menu = () => {
     setInput((prev) => ({ ...prev, file: e.target.files![0] }));
   };
 
+  const handleImageUpload = async () => {
+    const { file } = input;
+    if (!file) return;
+
+    const { url, fields, key } = await createPresignedUrl({
+      fileType: file.type,
+    });
+
+    const data = {
+      ...fields,
+      'Content-Type': file.type,
+      file,
+    };
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value as any);
+    });
+
+    await fetch(url, { method: 'POST', body: formData });
+
+    return key;
+  };
+
+  const addMenuItem = async () => {
+    const key = await handleImageUpload();
+    if (!key) throw new Error('No Key');
+
+    await addItem({
+      name: input.name,
+      description: input.description,
+      categories: input.categories.map(
+        (category) => category.value as Exclude<Categories, 'all'>
+      ),
+      price: input.price,
+      imageKey: key,
+    });
+
+    refetch();
+
+    setInput(initialInput);
+    setPreview('');
+  };
+
+  const handleDelete = async (imageKey: string, id: string) => {
+    await deleteMenuItem({ id, imageKey });
+    refetch();
+  };
+
   return (
     <>
       <div className=''>
@@ -58,6 +118,15 @@ const menu = () => {
             onChange={handleTextChange}
             value={input.name}
           />
+          <input
+            name='description'
+            className='h-12 rounded-sm border-none bg-gray-200'
+            type='text'
+            placeholder='Description'
+            onChange={handleTextChange}
+            value={input.description}
+          />
+
           <input
             name='price'
             className='h-12 rounded-sm-border-none bg-gray-200'
@@ -109,7 +178,7 @@ const menu = () => {
           <button
             className='h-12 rounded-sm bg-gray-200 disabled:cursor-not-allowed'
             disabled={!input.file || !input.name}
-            onClick={() => {}}
+            onClick={addMenuItem}
           >
             Add menu item
           </button>
@@ -119,16 +188,18 @@ const menu = () => {
       <div className='mx-auto mt-12 max-w-7xl'>
         <p className='text-lg font-medium'>Your menu items:</p>
         <div className='mt-6 mb-12 grid grid-cols-4 gap-8'>
-          {[].map((menuItem) => (
-            <div key={menuItem}>
-              <p></p>
+          {menuItems?.map((menuItem) => (
+            <div key={menuItem.id}>
+              <p>{menuItem.name}</p>
               <div className='relative h-40 w-40'>
-                <Image priority fill alt='Item' src={menuItem} />
+                <Image priority fill alt='Item' src={menuItem.url} />
               </div>
               <button
                 className='text-xs text-red-500'
-                onClick={() => {}}
-              ></button>
+                onClick={() => handleDelete(menuItem.imageKey, menuItem.id)}
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
