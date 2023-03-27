@@ -6,6 +6,7 @@ import {
   STORE_CLOSING_TIME,
   STORE_OPENING_TIME,
 } from '~/constants/config';
+import { DateObject } from '~/utils/types';
 
 interface CalendarProps {
   date: DateObject;

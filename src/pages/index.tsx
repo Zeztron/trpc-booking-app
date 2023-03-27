@@ -1,16 +1,24 @@
 'use client';
 
 import { type NextPage } from 'next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Calendar } from '~/components';
+import { Calendar, Menu, Spinner } from '~/components';
 import { DateObject } from '~/utils/types';
+import { api } from '~/utils/api';
 
 const Home: NextPage = () => {
   const [date, setDate] = useState<DateObject>({
     justDate: null,
     dateTime: null,
   });
+
+  useEffect(() => {
+    if (date.dateTime) checkMenuStatus();
+  }, [date.dateTime]);
+
+  const { mutate: checkMenuStatus, isSuccess } =
+    api.menu.checkMenuStatus.useMutation();
 
   return (
     <>
@@ -21,7 +29,14 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <Calendar setDate={setDate} date={date} />
+        {!date.dateTime && <Calendar setDate={setDate} date={date} />}
+        {date.dateTime && isSuccess ? (
+          <Menu />
+        ) : (
+          <div className='flex h-screen items-center justify-center'>
+            <Spinner />
+          </div>
+        )}
       </main>
     </>
   );
