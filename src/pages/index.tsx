@@ -1,25 +1,18 @@
 'use client';
 
+import { formatISO } from 'date-fns';
 import { type NextPage } from 'next';
-import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Calendar, Menu, Spinner } from '~/components';
-import { DateObject } from '~/utils/types';
-import { api } from '~/utils/api';
+import type { Day } from '@prisma/client';
+import { Calendar } from '~/components';
+import { prisma } from '~/server/db';
 
-const Home: NextPage = () => {
-  const [date, setDate] = useState<DateObject>({
-    justDate: null,
-    dateTime: null,
-  });
+interface HomeProps {
+  days: Day[];
+  closedDays: string[];
+}
 
-  useEffect(() => {
-    if (date.dateTime) checkMenuStatus();
-  }, [date.dateTime]);
-
-  const { mutate: checkMenuStatus, isSuccess } =
-    api.menu.checkMenuStatus.useMutation();
-
+const Home: NextPage<HomeProps> = ({ days, closedDays }) => {
   return (
     <>
       <Head>
@@ -29,17 +22,19 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        {!date.dateTime && <Calendar setDate={setDate} date={date} />}
-        {date.dateTime && isSuccess ? (
-          <Menu />
-        ) : (
-          <div className='flex h-screen items-center justify-center'>
-            <Spinner />
-          </div>
-        )}
+        <Calendar days={days} closedDays={closedDays} />
       </main>
     </>
   );
 };
+
+export async function getServerSideProps() {
+  const days = await prisma.day.findMany();
+  const closedDays = (await prisma.closedDay.findMany()).map((day) =>
+    formatISO(day.date)
+  );
+
+  return { props: { days, closedDays } };
+}
 
 export default Home;

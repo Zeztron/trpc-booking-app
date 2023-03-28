@@ -1,43 +1,50 @@
-import React, { Dispatch, SetStateAction } from 'react';
+'use client'
+
+import React, { useEffect, useState } from 'react';
 import ReactCalendar from 'react-calendar';
-import { add, format } from 'date-fns';
-import {
-  INTERVAL,
-  STORE_CLOSING_TIME,
-  STORE_OPENING_TIME,
-} from '~/constants/config';
+import { format, formatISO, isBefore, parse } from 'date-fns';
+import type { Day } from '@prisma/client';
+import { useRouter } from 'next/navigation';
+import { getOpeningTimes, roundToNearestMinutes } from '~/utils/helpers';
+import { INTERVAL, now } from '~/constants/config';
 import { DateObject } from '~/utils/types';
 
 interface CalendarProps {
-  date: DateObject;
-  setDate: Dispatch<SetStateAction<DateObject>>;
+  days: Day[];
+  closedDays: string[];
 }
 
-const Calendar: React.FC<CalendarProps> = ({ date, setDate }) => {
-  const getTimes = (date: DateObject, interval: number = INTERVAL): Date[] => {
-    if (!date || !date.justDate) return [];
+const Calendar: React.FC<CalendarProps> = ({ days, closedDays }) => {
+  const router = useRouter();
 
-    const { justDate } = date;
+  const today = days.find((day) => day.dayOfWeek === now.getDay());
+  const rounded = roundToNearestMinutes(now, INTERVAL);
+  const closing = parse(today!.closeTime, 'kk:mm', now);
+  const tooLate = !isBefore(rounded, closing);
 
-    const beginning = add(justDate, { hours: STORE_OPENING_TIME });
-    const end = add(justDate, { hours: STORE_CLOSING_TIME });
+  if (tooLate) closedDays.push(formatISO(new Date().setHours(0, 0, 0, 0)));
 
-    const times = [];
-    for (let i = beginning; i < end; i = add(i, { minutes: interval })) {
-      times.push(i);
+  const [date, setDate] = useState<DateObject>({
+    justDate: null,
+    dateTime: null,
+  });
+
+  useEffect(() => {
+    if (date.dateTime) {
+      localStorage.setItem('selectedTime', date.dateTime.toISOString());
+      router.push('/menu');
     }
+  }, [date.dateTime]);
 
-    return times;
-  };
-
-  const times = getTimes(date);
+  const times = date.justDate && getOpeningTimes(date.justDate, days);
 
   return (
     <div className='h-screen flex flex-col justify-center items-center'>
       {date.justDate ? (
         <div className='flex gap-4'>
-          {times.length > 0 &&
-            times.map((time, i) => (
+          {times &&
+            times.length > 0 &&
+            times?.map((time, i) => (
               <div key={`time-${i}`} className='rounded-sm bg-gray-100 p-2'>
                 <button
                   type='button'
@@ -55,6 +62,7 @@ const Calendar: React.FC<CalendarProps> = ({ date, setDate }) => {
           minDate={new Date()}
           className='REACT-CALENDAR p-2'
           view='month'
+          tileDisabled={({ date }) => closedDays.includes(formatISO(date))}
           onClickDay={(date) =>
             setDate((prev) => ({ ...prev, justDate: date }))
           }

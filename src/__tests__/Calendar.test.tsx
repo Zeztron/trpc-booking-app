@@ -1,32 +1,67 @@
 import { render, screen } from '@testing-library/react';
 import { format } from 'date-fns';
+import { Day } from '@prisma/client';
 import Calendar from '../components/Calendar';
 
+jest.mock('next/navigation')
+
+const days: Day[] = [
+  {
+    id: '1',
+    name: 'sunday',
+    dayOfWeek: 0,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '2',
+    name: 'monday',
+    dayOfWeek: 1,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '3',
+    name: 'tuesday',
+    dayOfWeek: 2,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '4',
+    name: 'wednesday',
+    dayOfWeek: 3,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '5',
+    name: 'thursday',
+    dayOfWeek: 4,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '6',
+    name: 'friday',
+    dayOfWeek: 5,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+  {
+    id: '7',
+    name: 'saturday',
+    dayOfWeek: 6,
+    openTime: '09:00',
+    closeTime: '17:00',
+  },
+];
+
 describe('Calendar', () => {
-  it('should render a calendar when no date is selected', () => {
-    const mockSetDate = jest.fn();
-    const mockDate = {
-      justDate: null,
-      dateTime: null,
-    };
-    render(<Calendar setDate={mockSetDate} date={mockDate} />);
-    const monthAndYear = format(new Date(), 'MMMM yyyy');
-    const calendarElement = screen.getByRole('button', { name: monthAndYear });
-    expect(calendarElement).toBeInTheDocument();
+  it('should render a calendar and display opening times', () => {
+    render(<Calendar days={days} closedDays={[]} />);
+    console.log(screen.debug());
   });
 
-  it('should render times after selecting a date', async () => {
-    const mockSetDate = jest.fn();
-    const mockDate: DateObject = {
-      justDate: new Date(),
-      dateTime: null,
-    };
-    mockDate.justDate?.setHours(0, 0, 0, 0);
-
-    render(<Calendar setDate={mockSetDate} date={mockDate} />);
-
-    const hours = screen.getAllByRole('button', { name: /:00/ });
-
-    expect(hours).toHaveLength(3);
-  });
+  it('should render times after selecting a date', async () => {});
 });

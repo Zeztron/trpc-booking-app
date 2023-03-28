@@ -13,7 +13,7 @@ interface MenuProps {
   addToCart: (id: string, quantity: number) => void;
 }
 
-const Menu = () => {
+const Menu: React.FC<MenuProps> = ({ selectedTime, addToCart }) => {
   const router = useRouter();
   const { data: menuItems } = api.menu.getMenuItems.useQuery(undefined, {
     refetchOnMount: false,
@@ -35,8 +35,7 @@ const Menu = () => {
               className='cursor-pointer'
               onClick={() => router.push('/')}
             />
-            On our menu for{' '}
-            {format(parseISO(new Date().toISOString()), 'MMM do, yyyy')}
+            On our menu for {format(parseISO(selectedTime), 'MMM do, yyyy')}
           </h2>
           <Select
             onChange={(e) => {
